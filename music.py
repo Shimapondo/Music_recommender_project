@@ -1,9 +1,12 @@
+#code imports associated Python Libraries
+
 import pickle
 import streamlit as st
 import requests
 import asyncio
 import aiohttp
 
+#function fetches movie posters from the movie data base
 async def fetch_poster(session, movie_id):
     url = "https://api.themoviedb.org/3/movie/{}?api_key=8265bd1679663a7ea12ac168da84d2e8&language=en-US".format(movie_id)
     async with session.get(url) as response:
@@ -14,6 +17,7 @@ async def fetch_poster(session, movie_id):
         else:
             return None
 
+#function recommends movies according to their similarity
 async def recommend(movie, movies, similarity):
     index = movies[movies['title'] == movie].index[0]
     distances = sorted(list(enumerate(similarity[index])), reverse=True, key=lambda x: x[1])
@@ -26,7 +30,7 @@ async def recommend(movie, movies, similarity):
         recommended_movie_posters = await asyncio.gather(*tasks)
         recommended_movies = [movies.iloc[i[0]].title for i in distances[1:6]]
     return recommended_movies, recommended_movie_posters
-
+#sets up interface for the recommender system, gives a drop down menu
 def main():
     st.header('Movie Recommender System')
     movies = pickle.load(open('model/movie_list.pkl','rb'))
